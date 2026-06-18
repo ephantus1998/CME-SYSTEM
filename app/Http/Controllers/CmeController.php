@@ -125,24 +125,30 @@ class CmeController extends Controller
      */
     public function storeStaff(Request $request)
     {
-        // 1. Basic validation (Removed the unique constraint to allow existing profiles to submit)
+        // 1. Core Validation Architecture (email & license are nullable to allow seamless intern sign-ins)
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'staff_no' => 'required|string|max:50',
-            'department' => 'required|string|max:100',
+            'name'       => 'required|string|max:255',
+            'staff_no'   => 'required|string|max:50',
+            'cadre'      => 'required|string|max:100',
+            'department' => 'required|string|max:255',
+            'email'      => 'nullable|email|max:255',
+            'license_no' => 'nullable|string|max:100',
         ]);
 
         // 2. Check if this staff member already exists in the system database
         $staff = Staff::where('staff_no', $validated['staff_no'])->first();
 
         if (! $staff) {
-            // Profile does not exist yet; save them as a brand new staff member
+            // Profile does not exist yet; save them with all details captured
             $staff = Staff::create($validated);
         } else {
-            // Profile exists; silently update details in case they changed departments
+            // Profile exists; silently update matching criteria in case properties evolved
             $staff->update([
-                'name' => $validated['name'],
-                'department' => $validated['department']
+                'name'       => $validated['name'],
+                'cadre'      => $validated['cadre'],
+                'department' => $validated['department'],
+                'email'      => $validated['email'],
+                'license_no' => $validated['license_no']
             ]);
         }
 
@@ -159,8 +165,8 @@ class CmeController extends Controller
                     // Flush the tracking session variable to cleanly reset application state
                     session()->forget('active_cme_id');
 
-                    return redirect()->route('cmes.index')
-                        ->with('info', "Hello {$staff->name}, you are already checked into the session: '{$cme->title}'.");
+                    return redirect()->route('staff.registration.success')
+                        ->with('success', "Hello {$staff->name}, your attendance for '{$cme->title}' was already logged successfully!");
                 }
 
                 // 5. Fresh check-in entry creation
@@ -172,11 +178,12 @@ class CmeController extends Controller
                 // Clear temporary tracking parameter
                 session()->forget('active_cme_id');
 
-                return redirect()->route('cmes.index')
+                return redirect()->route('staff.registration.success')
                     ->with('success', "Welcome {$staff->name}! Your attendance for '{$cme->title}' has been logged successfully.");
             }
         }
 
-        return redirect()->route('cmes.index')->with('success', 'Staff registration profile details updated successfully!');
+        return redirect()->route('staff.registration.success')
+            ->with('success', "Thank you {$staff->name}, your profile details have been updated successfully!");
     }
 }

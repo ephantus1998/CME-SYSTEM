@@ -9,8 +9,23 @@ class Staff extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'staff_no', 'department'];
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name', 
+        'staff_no', 
+        'department',
+        'cadre',
+        'email',
+        'license_no'
+    ];
 
+    /**
+     * Get all of the attendance logs recorded for this staff member.
+     */
     public function attendances()
     {
         return $this->hasMany(Attendance::class);

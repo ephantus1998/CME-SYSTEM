@@ -29,6 +29,11 @@ Route::get('/register-staff', [CmeController::class, 'showRegisterForm'])->name(
 Route::post('/register-staff', [CmeController::class, 'storeStaff'])->name('staff.store');
 Route::post('/cmes/{cme}/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
 
+// Landing Route for Successful Registrations via QR
+Route::get('/registration-success', function () {
+    return view('staff.success');
+})->name('staff.registration.success');
+
 
 // -------------------------------------------------------------
 // Administrative Guarded Management Routes (Login Enforced)

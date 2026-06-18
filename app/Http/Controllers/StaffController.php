@@ -59,7 +59,7 @@ class StaffController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'staff_no' => "required|string|max:50|unique:staff,staff_no,{$id}",
-            'department' => 'required|string|max:100',
+            'department' => 'required|string|max:255', // Expanded to perfectly accommodate longer department strings securely
         ]);
 
         $staff->update($validated);
